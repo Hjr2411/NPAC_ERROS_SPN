@@ -4,7 +4,236 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Consulta de Erros NPAC</title>
-  <link rel="stylesheet" href="styles.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background: white;
+      padding: 20px 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .header h1 {
+      color: #333;
+      font-size: 1.8em;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      color: #666;
+      font-weight: 500;
+    }
+
+    .btn-logout {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+
+    .btn-logout:hover {
+      background: #c82333;
+      transform: translateY(-2px);
+    }
+
+    .search-box {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    .search-controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .search-controls input {
+      flex: 1;
+      padding: 12px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: all 0.3s;
+    }
+
+    .search-controls input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .search-controls button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #5a6268;
+    }
+
+    .search-hint {
+      font-size: 13px;
+      color: #666;
+      font-style: italic;
+    }
+
+    .results {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      min-height: 300px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #667eea;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .info-message {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+      font-size: 16px;
+    }
+
+    .info-message.highlight {
+      background: #e7f3ff;
+      border-left: 4px solid #667eea;
+      border-radius: 8px;
+    }
+
+    .results-header {
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .results-count {
+      color: #667eea;
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .error-card {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+      margin-bottom: 15px;
+      transition: all 0.3s;
+    }
+
+    .error-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transform: translateX(5px);
+    }
+
+    .error-code {
+      background: #667eea;
+      color: white;
+      padding: 6px 14px;
+      border-radius: 6px;
+      display: inline-block;
+      margin-bottom: 12px;
+      font-weight: bold;
+      font-size: 15px;
+    }
+
+    .error-desc {
+      margin: 10px 0;
+      line-height: 1.6;
+      color: #333;
+    }
+
+    .error-desc strong {
+      color: #495057;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+    }
+
+    .no-results-icon {
+      font-size: 48px;
+      margin-bottom: 15px;
+    }
+
+    @media (max-width: 768px) {
+      .header {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .search-controls {
+        flex-direction: column;
+      }
+
+      .search-controls button {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -17,27 +246,49 @@
     </div>
 
     <div class="search-box">
-      <input 
-        type="text" 
-        id="searchInput" 
-        placeholder="Digite código do erro ou parte da descrição (PT/EN)..."
-        autocomplete="off"
-      >
-      <button id="searchBtn" class="btn-primary">Buscar</button>
-      <button id="clearBtn" class="btn-secondary">Limpar</button>
+      <div class="search-controls">
+        <input 
+          type="text" 
+          id="searchInput" 
+          placeholder="Digite o código do erro ou parte da descrição (PT/EN)..."
+          autocomplete="off"
+        >
+        <button id="searchBtn" class="btn-primary">🔍 Buscar</button>
+        <button id="clearBtn" class="btn-secondary">✖ Limpar</button>
+      </div>
+      <div class="search-hint">
+        💡 Exemplos: "100", "timer", "migration failed", "sistema"
+      </div>
     </div>
 
-    <div id="results" class="results"></div>
-    <div id="loading" class="loading" style="display: none;">⏳ Carregando...</div>
+    <div id="results" class="results">
+      <div class="info-message highlight">
+        <strong>👋 Bem-vindo!</strong><br>
+        Digite algo no campo acima para buscar erros NPAC.
+      </div>
+    </div>
   </div>
 
   <script type="module">
-    import { db } from './firebase-config.js';
-    import { ref, get, push, set } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, get, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    // Configuração Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyC99A9g4nMpYzujhzZiT2xUKfdN0MAkNGY",
+      authDomain: "erro-npac-spn.firebaseapp.com",
+      databaseURL: "https://erro-npac-spn-default-rtdb.firebaseio.com",
+      projectId: "erro-npac-spn",
+      appId: "1:568064054155:web:450e7769371ed7c6c1958e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
     // Verificar sessão
     const currentUser = sessionStorage.getItem('currentUser');
     if (!currentUser) {
+      alert('⚠️ Sessão expirada. Faça login novamente.');
       window.location.href = 'index.html';
     }
 
@@ -47,14 +298,24 @@
     const searchBtn = document.getElementById('searchBtn');
     const clearBtn = document.getElementById('clearBtn');
     const results = document.getElementById('results');
-    const loading = document.getElementById('loading');
     const logoutBtn = document.getElementById('logoutBtn');
 
+    console.log('=== USER PAGE CARREGADA ===');
+    console.log('Usuário:', currentUser);
+    console.log('Botões encontrados:', {
+      searchBtn: !!searchBtn,
+      clearBtn: !!clearBtn,
+      logoutBtn: !!logoutBtn
+    });
+
     // Logout
-    logoutBtn.addEventListener('click', () => {
+    function handleLogout() {
+      console.log('Logout clicado');
       sessionStorage.removeItem('currentUser');
       window.location.href = 'index.html';
-    });
+    }
+
+    logoutBtn.addEventListener('click', handleLogout);
 
     // Registrar log
     async function logSearch(query) {
@@ -66,6 +327,7 @@
           query: query,
           timestamp: new Date().toISOString()
         });
+        console.log('Log registrado:', query);
       } catch (error) {
         console.error('Erro ao registrar log:', error);
       }
@@ -75,29 +337,42 @@
     async function searchErrors() {
       const query = searchInput.value.trim();
       
+      console.log('=== BUSCA INICIADA ===');
+      console.log('Query:', query);
+      
       if (!query) {
-        results.innerHTML = '<p class="info">⚠️ Digite algo para buscar</p>';
+        results.innerHTML = '<div class="info-message">⚠️ Digite algo para buscar</div>';
         return;
       }
 
-      loading.style.display = 'block';
-      results.innerHTML = '';
+      results.innerHTML = '<div class="loading">⏳ Buscando...</div>';
 
       try {
         // Registrar log
         await logSearch(query);
 
         // Buscar dados
+        console.log('Buscando no Firebase...');
         const errorsRef = ref(db, 'errors');
         const snapshot = await get(errorsRef);
 
+        console.log('Firebase respondeu:', snapshot.exists());
+
         if (!snapshot.exists()) {
-          results.innerHTML = '<p class="info">📭 Nenhum erro cadastrado no sistema</p>';
-          loading.style.display = 'none';
+          results.innerHTML = `
+            <div class="no-results">
+              <div class="no-results-icon">📭</div>
+              <strong>Nenhum erro cadastrado</strong><br>
+              <small>Use o painel Admin para importar a planilha</small>
+            </div>
+          `;
           return;
         }
 
         const errors = snapshot.val();
+        const totalErrors = Object.keys(errors).length;
+        console.log('Total de erros no banco:', totalErrors);
+
         const queryLower = query.toLowerCase();
         const matches = [];
 
@@ -116,48 +391,88 @@
           }
         }
 
-        loading.style.display = 'none';
+        console.log('Resultados encontrados:', matches.length);
 
         // Exibir resultados
         if (matches.length === 0) {
-          results.innerHTML = `<p class="info">❌ Nenhum resultado encontrado para: <strong>${query}</strong></p>`;
+          results.innerHTML = `
+            <div class="no-results">
+              <div class="no-results-icon">🔍</div>
+              <strong>Nenhum resultado encontrado</strong><br>
+              Sua busca por "<strong>${query}</strong>" não retornou resultados.<br>
+              <small>Tente usar palavras-chave diferentes ou parte do código</small>
+            </div>
+          `;
         } else {
           results.innerHTML = `
-            <p class="info">✅ ${matches.length} resultado(s) encontrado(s)</p>
+            <div class="results-header">
+              <div class="results-count">
+                ✅ ${matches.length} resultado${matches.length > 1 ? 's' : ''} encontrado${matches.length > 1 ? 's' : ''} para: <strong>"${query}"</strong>
+              </div>
+            </div>
             ${matches.map(error => `
               <div class="error-card">
                 <div class="error-code">${error.code || 'N/A'}</div>
                 <div class="error-desc">
-                  <strong>🇧🇷 Português:</strong> ${error.pt || 'Sem descrição'}
+                  <strong>🇧🇷 Português:</strong>
+                  ${error.pt || 'Sem descrição'}
                 </div>
                 <div class="error-desc">
-                  <strong>🇺🇸 English:</strong> ${error.en || 'No description'}
+                  <strong>🇺🇸 English:</strong>
+                  ${error.en || 'No description'}
                 </div>
               </div>
             `).join('')}
           `;
         }
       } catch (error) {
-        loading.style.display = 'none';
-        results.innerHTML = `<p class="error">❌ Erro ao buscar: ${error.message}</p>`;
+        console.error('Erro na busca:', error);
+        results.innerHTML = `
+          <div class="no-results">
+            <div class="no-results-icon">❌</div>
+            <strong>Erro ao buscar</strong><br>
+            ${error.message}
+          </div>
+        `;
       }
     }
 
     // Limpar busca
     function clearSearch() {
+      console.log('Limpar clicado');
       searchInput.value = '';
-      results.innerHTML = '';
+      results.innerHTML = `
+        <div class="info-message highlight">
+          <strong>👋 Bem-vindo!</strong><br>
+          Digite algo no campo acima para buscar erros NPAC.
+        </div>
+      `;
       searchInput.focus();
     }
 
     // Eventos
-    searchBtn.addEventListener('click', searchErrors);
-    clearBtn.addEventListener('click', clearSearch);
-    searchInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') searchErrors();
+    console.log('Configurando eventos...');
+
+    searchBtn.addEventListener('click', () => {
+      console.log('Botão Buscar clicado');
+      searchErrors();
     });
 
+    clearBtn.addEventListener('click', () => {
+      console.log('Botão Limpar clicado');
+      clearSearch();
+    });
+
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        console.log('Enter pressionado');
+        searchErrors();
+      }
+    });
+
+    // Focar no campo ao carregar
     searchInput.focus();
+    console.log('=== USER PAGE PRONTA ===');
   </script>
 </body>
 </html>
