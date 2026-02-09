@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ERRO NPAC SPN - Login 3</title>
+  <title>ERRO NPAC SPN - Login</title>
   <style>
     * {
       margin: 0;
@@ -262,9 +262,15 @@
         if (users[username] === true) {
           showMessage('✅ Acesso autorizado! Redirecionando...', 'success');
           sessionStorage.setItem('currentUser', username);
+          
+          // Verificar se é admin
           setTimeout(() => {
-            window.location.href = 'user.html';
-          }, 1000);
+            if (ADMIN_USERS.includes(username)) {
+              window.location.href = 'admin.html';
+            } else {
+              window.location.href = 'user.html';
+            }
+          }, 500);
         } else {
           showMessage(`❌ Usuário "${username}" não autorizado. Use o painel Admin para cadastrar.`, 'error');
           debugInfo.innerHTML = `❌ Usuário não encontrado em: ${Object.keys(users).join(', ')}`;
