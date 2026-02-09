@@ -2,88 +2,284 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Admin • ERRO NPAC SPN</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - NPAC Errors</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
+  <div class="container">
+    <div class="header">
+      <h1>⚙️ Painel Administrativo</h1>
+      <button id="backBtn" class="btn-logout">← Voltar ao Login</button>
+    </div>
 
-<header>Admin • ERRO NPAC SPN</header>
+    <div class="admin-panel">
+      <!-- Seção 1: Adicionar Usuário -->
+      <div class="admin-section">
+        <h2>👤 Autorizar Novo Usuário</h2>
+        <div class="form-group">
+          <input 
+            type="text" 
+            id="newUsername" 
+            placeholder="Nome do usuário (ex: joao_silva)"
+            autocomplete="off"
+          >
+          <button id="addUserBtn" class="btn-primary">Adicionar Usuário</button>
+        </div>
+        <div id="userMsg" class="message"></div>
+      </div>
 
-<div class="container">
+      <!-- Seção 2: Importar Planilha -->
+      <div class="admin-section">
+        <h2>📊 Importar Planilha Excel</h2>
+        <p class="info">
+          A planilha deve conter as colunas: <strong>Error_code</strong>, 
+          <strong>Descrição em Português</strong>, <strong>Description in English</strong>
+        </p>
+        <div class="form-group">
+          <input type="file" id="excelFile" accept=".xlsx,.xls" class="file-input">
+          <button id="importBtn" class="btn-primary">Importar Dados</button>
+        </div>
+        <div id="importMsg" class="message"></div>
+        <div id="preview" class="preview"></div>
+      </div>
 
-  <h3>Autorizar Usuário</h3>
-  <input id="novoUsuario" placeholder="nome_do_usuario">
-  <button id="btnUser">Autorizar</button>
+      <!-- Seção 3: Ver Logs -->
+      <div class="admin-section">
+        <h2>📝 Logs de Consultas (Últimos 50)</h2>
+        <button id="loadLogsBtn" class="btn-secondary">Carregar Logs</button>
+        <div id="logsContainer" class="logs-container"></div>
+      </div>
 
-  <hr>
+      <!-- Seção 4: Usuários Autorizados -->
+      <div class="admin-section">
+        <h2>👥 Usuários Autorizados</h2>
+        <button id="loadUsersBtn" class="btn-secondary">Carregar Usuários</button>
+        <div id="usersContainer" class="users-container"></div>
+      </div>
+    </div>
+  </div>
 
-  <h3>Importar Planilha Excel</h3>
-  <input type="file" id="excel">
-  <button id="btnImportar">Importar</button>
+  <script type="module">
+    import { db } from './firebase-config.js';
+    import { ref, get, set, push, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
-  <hr>
+    const backBtn = document.getElementById('backBtn');
+    const newUsername = document.getElementById('newUsername');
+    const addUserBtn = document.getElementById('addUserBtn');
+    const userMsg = document.getElementById('userMsg');
+    const excelFile = document.getElementById('excelFile');
+    const importBtn = document.getElementById('importBtn');
+    const importMsg = document.getElementById('importMsg');
+    const preview = document.getElementById('preview');
+    const loadLogsBtn = document.getElementById('loadLogsBtn');
+    const logsContainer = document.getElementById('logsContainer');
+    const loadUsersBtn = document.getElementById('loadUsersBtn');
+    const usersContainer = document.getElementById('usersContainer');
 
-  <h3>Logs de Consulta</h3>
-  <button id="btnLogs">Carregar Logs</button>
-  <div id="logs"></div>
-
-</div>
-
-<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-
-<script type="module">
-import { db } from "./firebase.js";
-import { ref, set, push, get } 
-  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-document.getElementById("btnUser").onclick = async () => {
-  const nome = document.getElementById("novoUsuario").value.trim().toLowerCase();
-  if (!nome) return;
-  await set(ref(db, "allowed_users/" + nome), true);
-  alert("Usuário autorizado");
-};
-
-document.getElementById("btnImportar").onclick = () => {
-  const file = document.getElementById("excel").files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = e => {
-    const wb = XLSX.read(e.target.result, { type: "binary" });
-    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-
-    rows.forEach(r => {
-      if (!r.code || !r.pt || !r.en) return;
-      set(ref(db, "errors/" + r.code), {
-        code: r.code,
-        pt: r.pt,
-        en: r.en
-      });
+    // Voltar
+    backBtn.addEventListener('click', () => {
+      window.location.href = 'index.html';
     });
 
-    alert("Planilha importada com sucesso");
-  };
+    // Adicionar usuário
+    async function addUser() {
+      const username = newUsername.value.toLowerCase().trim().replace(/\s+/g, '_');
+      
+      if (!/^[a-z0-9_]{3,}$/.test(username)) {
+        showMessage(userMsg, '❌ Nome inválido', 'error');
+        return;
+      }
 
-  reader.readAsBinaryString(file);
-};
+      try {
+        const userRef = ref(db, `allowed_users/${username}`);
+        await set(userRef, true);
+        showMessage(userMsg, `✅ Usuário "${username}" autorizado com sucesso!`, 'success');
+        newUsername.value = '';
+      } catch (error) {
+        showMessage(userMsg, `❌ Erro: ${error.message}`, 'error');
+      }
+    }
 
-document.getElementById("btnLogs").onclick = async () => {
-  const snap = await get(ref(db, "logs"));
-  let html = "";
+    addUserBtn.addEventListener('click', addUser);
 
-  snap.forEach(l => {
-    if (l.key === "_init") return;
-    const d = l.val();
-    html += `<div class="result">
-      ${d.user} → ${d.query}<br>
-      ${d.timestamp}
-    </div>`;
-  });
+    // Importar Excel
+    async function importExcel() {
+      const file = excelFile.files[0];
+      
+      if (!file) {
+        showMessage(importMsg, '❌ Selecione um arquivo Excel', 'error');
+        return;
+      }
 
-  document.getElementById("logs").innerHTML = html || "Nenhum log.";
-};
-</script>
+      const reader = new FileReader();
+      
+      reader.onload = async (e) => {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          const jsonData = XLSX.utils.sheet_to_json(firstSheet);
 
+          if (jsonData.length === 0) {
+            showMessage(importMsg, '❌ Planilha vazia', 'error');
+            return;
+          }
+
+          // Validar colunas
+          const firstRow = jsonData[0];
+          const hasErrorCode = 'Error_code' in firstRow;
+          const hasPT = 'Descrição em Português' in firstRow;
+          const hasEN = 'Description in English' in firstRow;
+
+          if (!hasErrorCode || !hasPT || !hasEN) {
+            showMessage(importMsg, '❌ Planilha deve ter as colunas: Error_code, Descrição em Português, Description in English', 'error');
+            return;
+          }
+
+          showMessage(importMsg, `⏳ Importando ${jsonData.length} registros...`, 'info');
+
+          // Importar dados
+          const errorsRef = ref(db, 'errors');
+          const errorsData = {};
+
+          jsonData.forEach(row => {
+            const code = String(row['Error_code'] || '').trim();
+            if (code && code !== '_init') {
+              errorsData[code] = {
+                code: code,
+                pt: String(row['Descrição em Português'] || '').trim(),
+                en: String(row['Description in English'] || '').trim()
+              };
+            }
+          });
+
+          await set(errorsRef, errorsData);
+
+          showMessage(importMsg, `✅ ${Object.keys(errorsData).length} erros importados com sucesso!`, 'success');
+          
+          // Preview
+          preview.innerHTML = `
+            <h3>Preview dos primeiros 5 registros:</h3>
+            ${Object.values(errorsData).slice(0, 5).map(err => `
+              <div class="preview-item">
+                <strong>${err.code}</strong><br>
+                PT: ${err.pt}<br>
+                EN: ${err.en}
+              </div>
+            `).join('')}
+          `;
+          
+          excelFile.value = '';
+        } catch (error) {
+          showMessage(importMsg, `❌ Erro ao importar: ${error.message}`, 'error');
+        }
+      };
+
+      reader.readAsArrayBuffer(file);
+    }
+
+    importBtn.addEventListener('click', importExcel);
+
+    // Carregar logs
+    async function loadLogs() {
+      try {
+        logsContainer.innerHTML = '⏳ Carregando...';
+        const logsRef = ref(db, 'logs');
+        const snapshot = await get(logsRef);
+
+        if (!snapshot.exists()) {
+          logsContainer.innerHTML = '<p>📭 Nenhum log encontrado</p>';
+          return;
+        }
+
+        const logs = Object.entries(snapshot.val())
+          .filter(([key]) => key !== '_init')
+          .map(([key, log]) => ({ key, ...log }))
+          .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+          .slice(0, 50);
+
+        logsContainer.innerHTML = `
+          <table class="logs-table">
+            <thead>
+              <tr>
+                <th>Data/Hora</th>
+                <th>Usuário</th>
+                <th>Consulta</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${logs.map(log => `
+                <tr>
+                  <td>${new Date(log.timestamp).toLocaleString('pt-BR')}</td>
+                  <td>${log.user}</td>
+                  <td>${log.query}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+      } catch (error) {
+        logsContainer.innerHTML = `<p class="error">❌ Erro: ${error.message}</p>`;
+      }
+    }
+
+    loadLogsBtn.addEventListener('click', loadLogs);
+
+    // Carregar usuários
+    async function loadUsers() {
+      try {
+        usersContainer.innerHTML = '⏳ Carregando...';
+        const usersRef = ref(db, 'allowed_users');
+        const snapshot = await get(usersRef);
+
+        if (!snapshot.exists()) {
+          usersContainer.innerHTML = '<p>📭 Nenhum usuário autorizado</p>';
+          return;
+        }
+
+        const users = Object.keys(snapshot.val());
+
+        usersContainer.innerHTML = `
+          <ul class="users-list">
+            ${users.map(user => `
+              <li>
+                <span>👤 ${user}</span>
+                <button class="btn-remove" data-user="${user}">Remover</button>
+              </li>
+            `).join('')}
+          </ul>
+        `;
+
+        // Evento de remoção
+        document.querySelectorAll('.btn-remove').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            const username = e.target.dataset.user;
+            if (confirm(`Remover usuário "${username}"?`)) {
+              try {
+                const userRef = ref(db, `allowed_users/${username}`);
+                await remove(userRef);
+                loadUsers();
+              } catch (error) {
+                alert('Erro ao remover: ' + error.message);
+              }
+            }
+          });
+        });
+      } catch (error) {
+        usersContainer.innerHTML = `<p class="error">❌ Erro: ${error.message}</p>`;
+      }
+    }
+
+    loadUsersBtn.addEventListener('click', loadUsers);
+
+    // Helper
+    function showMessage(element, text, type) {
+      element.textContent = text;
+      element.className = `message ${type}`;
+      element.style.display = 'block';
+    }
+  </script>
 </body>
 </html>
-
