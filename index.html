@@ -180,7 +180,6 @@
       </div>
 
       <button id="loginBtn" class="btn-primary">Entrar</button>
-      <button id="adminBtn" class="btn-secondary">Acesso Admin</button>
 
       <div id="errorMsg" class="message"></div>
       
@@ -209,9 +208,11 @@
 
     const usernameInput = document.getElementById('username');
     const loginBtn = document.getElementById('loginBtn');
-    const adminBtn = document.getElementById('adminBtn');
     const errorMsg = document.getElementById('errorMsg');
     const debugInfo = document.getElementById('debugInfo');
+
+    // Lista de usuários admin
+    const ADMIN_USERS = ['helio_he710', 'admin'];
 
     // Normalizar nome
     function normalizeName(name) {
@@ -261,9 +262,15 @@
         if (users[username] === true) {
           showMessage('✅ Acesso autorizado! Redirecionando...', 'success');
           sessionStorage.setItem('currentUser', username);
+          
+          // Verificar se é admin
           setTimeout(() => {
-            window.location.href = 'user.html';
-          }, 1000);
+            if (ADMIN_USERS.includes(username)) {
+              window.location.href = 'admin.html';
+            } else {
+              window.location.href = 'user.html';
+            }
+          }, 500);
         } else {
           showMessage(`❌ Usuário "${username}" não autorizado. Use o painel Admin para cadastrar.`, 'error');
           debugInfo.innerHTML = `❌ Usuário não encontrado em: ${Object.keys(users).join(', ')}`;
