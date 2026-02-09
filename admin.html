@@ -1,1 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin • ERRO NPAC SPN</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>Admin • ERRO NPAC SPN</header>
+
+<div class="container">
+
+  <h3>Autorizar Usuário</h3>
+  <input id="novoUsuario" placeholder="nome_do_usuario">
+  <button id="btnUser">Autorizar</button>
+
+  <hr>
+
+  <h3>Importar Planilha Excel</h3>
+  <input type="file" id="excel">
+  <button id="btnImportar">Importar</button>
+
+  <hr>
+
+  <h3>Logs de Consulta</h3>
+  <button id="btnLogs">Carregar Logs</button>
+  <div id="logs"></div>
+
+</div>
+
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+<script type="module">
+import { db } from "./firebase.js";
+import { ref, set, push, get } 
+  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+document.getElementById("btnUser").onclick = async () => {
+  const nome = document.getElementById("novoUsuario").value.trim().toLowerCase();
+  if (!nome) return;
+  await set(ref(db, "allowed_users/" + nome), true);
+  alert("Usuário autorizado");
+};
+
+document.getElementById("btnImportar").onclick = () => {
+  const file = document.getElementById("excel").files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    const wb = XLSX.read(e.target.result, { type: "binary" });
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+
+    rows.forEach(r => {
+      if (!r.code || !r.pt || !r.en) return;
+      set(ref(db, "errors/" + r.code), {
+        code: r.code,
+        pt: r.pt,
+        en: r.en
+      });
+    });
+
+    alert("Planilha importada com sucesso");
+  };
+
+  reader.readAsBinaryString(file);
+};
+
+document.getElementById("btnLogs").onclick = async () => {
+  const snap = await get(ref(db, "logs"));
+  let html = "";
+
+  snap.forEach(l => {
+    if (l.key === "_init") return;
+    const d = l.val();
+    html += `<div class="result">
+      ${d.user} → ${d.query}<br>
+      ${d.timestamp}
+    </div>`;
+  });
+
+  document.getElementById("logs").innerHTML = html || "Nenhum log.";
+};
+</script>
+
+</body>
+</html>
 
