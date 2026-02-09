@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Teste Firebase NPAC</title>
+</head>
+<body>
+
+<h2>Teste Firebase</h2>
+<button onclick="testar()">Executar Teste</button>
+
+<pre id="saida"></pre>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, get, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "SUA_API_KEY",
+  authDomain: "SEU_AUTH_DOMAIN",
+  databaseURL: "SEU_DATABASE_URL",
+  projectId: "SEU_PROJECT_ID",
+  appId: "SEU_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+window.testar = async function () {
+  const saida = document.getElementById("saida");
+  saida.textContent = "Iniciando...\n";
+
+  // 1️⃣ Teste leitura allowed_users
+  const snap = await get(ref(db, "allowed_users"));
+  saida.textContent += "allowed_users:\n";
+  saida.textContent += JSON.stringify(snap.val(), null, 2) + "\n\n";
+
+  // 2️⃣ Teste escrita logs
+  await push(ref(db, "logs"), {
+    user: "teste_browser",
+    query: "sanity_check",
+    timestamp: new Date().toISOString()
+  });
+
+  saida.textContent += "Log inserido com sucesso.\n";
+};
+</script>
+
+</body>
+</html>
