@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Consulta de Erros NPAC</title>
+  <title>Admin - NPAC Errors</title>
   <style>
     * {
       margin: 0;
@@ -32,21 +32,11 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
-      gap: 15px;
     }
 
     .header h1 {
       color: #333;
       font-size: 1.8em;
-    }
-
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      color: #666;
-      font-weight: 500;
     }
 
     .btn-logout {
@@ -57,45 +47,70 @@
       border-radius: 8px;
       cursor: pointer;
       font-weight: 600;
-      font-size: 14px;
-      transition: all 0.3s;
     }
 
     .btn-logout:hover {
       background: #c82333;
-      transform: translateY(-2px);
     }
 
-    .search-box {
+    .admin-panel {
       background: white;
-      padding: 25px;
+      padding: 30px;
       border-radius: 12px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
     }
 
-    .search-controls {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 10px;
+    .admin-section {
+      margin-bottom: 40px;
+      padding-bottom: 30px;
+      border-bottom: 2px solid #f0f0f0;
     }
 
-    .search-controls input {
-      flex: 1;
+    .admin-section:last-child {
+      border-bottom: none;
+    }
+
+    .admin-section h2 {
+      color: #333;
+      margin-bottom: 15px;
+      font-size: 1.4em;
+    }
+
+    .info-text {
+      background: #e7f3ff;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      color: #004085;
+      font-size: 14px;
+      border-left: 4px solid #004085;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    input[type="text"] {
+      width: 100%;
       padding: 12px 15px;
       border: 2px solid #e0e0e0;
       border-radius: 8px;
       font-size: 16px;
-      transition: all 0.3s;
+      margin-bottom: 10px;
     }
 
-    .search-controls input:focus {
-      outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    input[type="file"] {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      border: 2px dashed #667eea;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 10px;
+      background: #f8f9ff;
     }
 
-    .search-controls button {
+    button {
       padding: 12px 24px;
       border: none;
       border-radius: 8px;
@@ -112,7 +127,6 @@
 
     .btn-primary:hover {
       background: #5568d3;
-      transform: translateY(-2px);
     }
 
     .btn-secondary {
@@ -124,154 +138,196 @@
       background: #5a6268;
     }
 
-    .search-hint {
-      font-size: 13px;
-      color: #666;
-      font-style: italic;
-    }
-
-    .results {
-      background: white;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      min-height: 300px;
-    }
-
-    .loading {
-      text-align: center;
-      padding: 40px;
-      color: #667eea;
-      font-size: 18px;
-      font-weight: 600;
-    }
-
-    .info-message {
-      text-align: center;
-      padding: 40px;
-      color: #666;
-      font-size: 16px;
-    }
-
-    .info-message.highlight {
-      background: #e7f3ff;
-      border-left: 4px solid #667eea;
+    .message {
+      margin-top: 15px;
+      padding: 12px;
       border-radius: 8px;
+      font-size: 14px;
+      display: none;
     }
 
-    .results-header {
-      margin-bottom: 20px;
-      padding-bottom: 15px;
-      border-bottom: 2px solid #f0f0f0;
+    .message.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+      display: block;
     }
 
-    .results-count {
-      color: #667eea;
-      font-weight: 600;
-      font-size: 16px;
+    .message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+      display: block;
     }
 
-    .error-card {
+    .message.info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+      display: block;
+    }
+
+    .preview {
+      margin-top: 20px;
+      max-height: 400px;
+      overflow-y: auto;
       background: #f8f9fa;
-      padding: 20px;
+      padding: 15px;
       border-radius: 8px;
-      border-left: 4px solid #667eea;
-      margin-bottom: 15px;
-      transition: all 0.3s;
     }
 
-    .error-card:hover {
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      transform: translateX(5px);
-    }
-
-    .error-code {
-      background: #667eea;
-      color: white;
-      padding: 6px 14px;
-      border-radius: 6px;
-      display: inline-block;
-      margin-bottom: 12px;
-      font-weight: bold;
-      font-size: 15px;
-    }
-
-    .error-desc {
-      margin: 10px 0;
-      line-height: 1.6;
+    .preview h3 {
       color: #333;
+      margin-bottom: 15px;
     }
 
-    .error-desc strong {
-      color: #495057;
+    .preview-item {
+      background: white;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      border-left: 4px solid #667eea;
+    }
+
+    .preview-item strong {
+      color: #667eea;
       display: block;
       margin-bottom: 5px;
     }
 
-    .no-results {
-      text-align: center;
-      padding: 40px;
-      color: #999;
+    .logs-container, .users-container {
+      margin-top: 15px;
+      max-height: 400px;
+      overflow-y: auto;
     }
 
-    .no-results-icon {
-      font-size: 48px;
-      margin-bottom: 15px;
+    .logs-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
     }
 
-    @media (max-width: 768px) {
-      .header {
-        flex-direction: column;
-        text-align: center;
-      }
+    .logs-table thead {
+      background: #667eea;
+      color: white;
+      position: sticky;
+      top: 0;
+    }
 
-      .search-controls {
-        flex-direction: column;
-      }
+    .logs-table th {
+      padding: 12px;
+      text-align: left;
+    }
 
-      .search-controls button {
-        width: 100%;
-      }
+    .logs-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .users-list {
+      list-style: none;
+    }
+
+    .users-list li {
+      background: #f8f9fa;
+      padding: 12px 15px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn-remove {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .btn-remove:hover {
+      background: #c82333;
+    }
+
+    .debug-console {
+      background: #1e1e1e;
+      color: #00ff00;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+      margin-top: 15px;
+    }
+
+    .debug-console div {
+      margin-bottom: 5px;
     }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1>🔍 Consulta de Erros NPAC</h1>
-      <div class="user-info">
-        <span id="currentUser"></span>
-        <button id="logoutBtn" class="btn-logout">Sair</button>
-      </div>
+      <h1>⚙️ Painel Administrativo</h1>
+      <button id="backBtn" class="btn-logout">← Voltar ao Login</button>
     </div>
 
-    <div class="search-box">
-      <div class="search-controls">
-        <input 
-          type="text" 
-          id="searchInput" 
-          placeholder="Digite o código do erro ou parte da descrição (PT/EN)..."
-          autocomplete="off"
-        >
-        <button id="searchBtn" class="btn-primary">🔍 Buscar</button>
-        <button id="clearBtn" class="btn-secondary">✖ Limpar</button>
+    <div class="admin-panel">
+      <!-- Seção 1: Adicionar Usuário -->
+      <div class="admin-section">
+        <h2>👤 Autorizar Novo Usuário</h2>
+        <div class="form-group">
+          <input 
+            type="text" 
+            id="newUsername" 
+            placeholder="Nome do usuário (ex: joao_silva)"
+            autocomplete="off"
+          >
+          <button id="addUserBtn" class="btn-primary">Adicionar Usuário</button>
+        </div>
+        <div id="userMsg" class="message"></div>
       </div>
-      <div class="search-hint">
-        💡 Exemplos: "100", "timer", "migration failed", "sistema"
-      </div>
-    </div>
 
-    <div id="results" class="results">
-      <div class="info-message highlight">
-        <strong>👋 Bem-vindo!</strong><br>
-        Digite algo no campo acima para buscar erros NPAC.
+      <!-- Seção 2: Importar Planilha -->
+      <div class="admin-section">
+        <h2>📊 Importar Planilha Excel</h2>
+        <div class="info-text">
+          <strong>📋 Formato esperado da planilha:</strong><br>
+          Colunas obrigatórias: <strong>Error_code</strong> | <strong>Descrição em Português</strong> | <strong>Description in English</strong>
+        </div>
+        <div class="form-group">
+          <input type="file" id="excelFile" accept=".xlsx,.xls">
+          <button id="importBtn" class="btn-primary">📤 Importar Dados</button>
+        </div>
+        <div id="importMsg" class="message"></div>
+        <div id="debugConsole" class="debug-console" style="display:none;"></div>
+        <div id="preview" class="preview" style="display:none;"></div>
+      </div>
+
+      <!-- Seção 3: Ver Logs -->
+      <div class="admin-section">
+        <h2>📝 Logs de Consultas (Últimos 50)</h2>
+        <button id="loadLogsBtn" class="btn-secondary">Carregar Logs</button>
+        <div id="logsContainer" class="logs-container"></div>
+      </div>
+
+      <!-- Seção 4: Usuários Autorizados -->
+      <div class="admin-section">
+        <h2>👥 Usuários Autorizados</h2>
+        <button id="loadUsersBtn" class="btn-secondary">Carregar Usuários</button>
+        <div id="usersContainer" class="users-container"></div>
       </div>
     </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, get, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, get, set, push, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     // Configuração Firebase
     const firebaseConfig = {
@@ -285,211 +341,301 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // Verificar sessão
+    // LISTA DE ADMINS AUTORIZADOS (adicione os nomes aqui)
+    const ADMIN_USERS = ['helio_he710', 'admin']; // Adicione mais admins conforme necessário
+
+    // Verificar se está autenticado E é admin
     const currentUser = sessionStorage.getItem('currentUser');
+    
     if (!currentUser) {
-      alert('⚠️ Sessão expirada. Faça login novamente.');
+      alert('⚠️ Acesso negado! Faça login primeiro.');
       window.location.href = 'index.html';
+    } else if (!ADMIN_USERS.includes(currentUser)) {
+      alert('🚫 Acesso negado! Você não tem permissão de administrador.');
+      window.location.href = 'user.html';
     }
 
-    document.getElementById('currentUser').textContent = `👤 ${currentUser}`;
+    console.log('=== ADMIN PAGE ===');
+    console.log('Usuário admin:', currentUser);
 
-    // Adicionar botão Admin se for admin
-    if (isAdmin) {
-      const adminBtn = document.createElement('button');
-      adminBtn.textContent = '⚙️ Admin';
-      adminBtn.className = 'btn-logout';
-      adminBtn.style.background = '#667eea';
-      adminBtn.style.marginRight = '10px';
-      adminBtn.addEventListener('click', () => {
-        window.location.href = 'admin.html';
-      });
-      document.querySelector('.user-info').insertBefore(adminBtn, logoutBtn);
+    const backBtn = document.getElementById('backBtn');
+    const newUsername = document.getElementById('newUsername');
+    const addUserBtn = document.getElementById('addUserBtn');
+    const userMsg = document.getElementById('userMsg');
+    const excelFile = document.getElementById('excelFile');
+    const importBtn = document.getElementById('importBtn');
+    const importMsg = document.getElementById('importMsg');
+    const preview = document.getElementById('preview');
+    const debugConsole = document.getElementById('debugConsole');
+    const loadLogsBtn = document.getElementById('loadLogsBtn');
+    const logsContainer = document.getElementById('logsContainer');
+    const loadUsersBtn = document.getElementById('loadUsersBtn');
+    const usersContainer = document.getElementById('usersContainer');
+
+    // Debug helper
+    function log(message) {
+      console.log(message);
+      debugConsole.style.display = 'block';
+      const div = document.createElement('div');
+      div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      debugConsole.appendChild(div);
+      debugConsole.scrollTop = debugConsole.scrollHeight;
     }
 
-    const searchInput = document.getElementById('searchInput');
-    const searchBtn = document.getElementById('searchBtn');
-    const clearBtn = document.getElementById('clearBtn');
-    const results = document.getElementById('results');
-    const logoutBtn = document.getElementById('logoutBtn');
-
-    // Lista de admins
-    const ADMIN_USERS = ['helio_he710', 'admin'];
-    const isAdmin = ADMIN_USERS.includes(currentUser);
-
-    console.log('=== USER PAGE CARREGADA ===');
-    console.log('Usuário:', currentUser);
-    console.log('Botões encontrados:', {
-      searchBtn: !!searchBtn,
-      clearBtn: !!clearBtn,
-      logoutBtn: !!logoutBtn
+    // Voltar
+    backBtn.addEventListener('click', () => {
+      window.location.href = 'index.html';
     });
 
-    // Logout
-    function handleLogout() {
-      console.log('Logout clicado');
-      sessionStorage.removeItem('currentUser');
-      window.location.href = 'index.html';
+    // Mostrar mensagem
+    function showMessage(element, text, type) {
+      element.textContent = text;
+      element.className = `message ${type}`;
     }
 
-    logoutBtn.addEventListener('click', handleLogout);
-
-    // Registrar log
-    async function logSearch(query) {
-      try {
-        const logsRef = ref(db, 'logs');
-        const newLogRef = push(logsRef);
-        await set(newLogRef, {
-          user: currentUser,
-          query: query,
-          timestamp: new Date().toISOString()
-        });
-        console.log('Log registrado:', query);
-      } catch (error) {
-        console.error('Erro ao registrar log:', error);
-      }
-    }
-
-    // Buscar erros
-    async function searchErrors() {
-      const query = searchInput.value.trim();
+    // Adicionar usuário
+    async function addUser() {
+      const username = newUsername.value.toLowerCase().trim().replace(/\s+/g, '_');
       
-      console.log('=== BUSCA INICIADA ===');
-      console.log('Query:', query);
-      
-      if (!query) {
-        results.innerHTML = '<div class="info-message">⚠️ Digite algo para buscar</div>';
+      if (!/^[a-z0-9_]{3,}$/.test(username)) {
+        showMessage(userMsg, '❌ Nome inválido', 'error');
         return;
       }
 
-      results.innerHTML = '<div class="loading">⏳ Buscando...</div>';
-
       try {
-        // Registrar log
-        await logSearch(query);
+        const userRef = ref(db, `allowed_users/${username}`);
+        await set(userRef, true);
+        showMessage(userMsg, `✅ Usuário "${username}" autorizado com sucesso!`, 'success');
+        newUsername.value = '';
+      } catch (error) {
+        showMessage(userMsg, `❌ Erro: ${error.message}`, 'error');
+      }
+    }
 
-        // Buscar dados
-        console.log('Buscando no Firebase...');
-        const errorsRef = ref(db, 'errors');
-        const snapshot = await get(errorsRef);
+    addUserBtn.addEventListener('click', addUser);
 
-        console.log('Firebase respondeu:', snapshot.exists());
+    // Importar Excel
+    async function importExcel() {
+      const file = excelFile.files[0];
+      
+      if (!file) {
+        showMessage(importMsg, '❌ Selecione um arquivo Excel', 'error');
+        return;
+      }
+
+      log('📁 Arquivo selecionado: ' + file.name);
+      showMessage(importMsg, '⏳ Lendo arquivo...', 'info');
+      debugConsole.innerHTML = '';
+
+      const reader = new FileReader();
+      
+      reader.onerror = () => {
+        showMessage(importMsg, '❌ Erro ao ler arquivo', 'error');
+        log('❌ Erro ao ler arquivo');
+      };
+
+      reader.onload = async (e) => {
+        try {
+          log('📖 Processando dados do Excel...');
+          
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          
+          log(`📊 Planilhas encontradas: ${workbook.SheetNames.join(', ')}`);
+          
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+
+          log(`📋 Total de linhas: ${jsonData.length}`);
+
+          if (jsonData.length === 0) {
+            showMessage(importMsg, '❌ Planilha vazia', 'error');
+            log('❌ Planilha sem dados');
+            return;
+          }
+
+          // Mostrar primeira linha para debug
+          const firstRow = jsonData[0];
+          log('🔍 Colunas detectadas: ' + Object.keys(firstRow).join(', '));
+
+          // Validar colunas (buscar por diferentes variações)
+          const possibleErrorCols = ['Error_code', 'error_code', 'ErrorCode', 'codigo', 'code', 'Code'];
+          const possiblePtCols = ['Descrição em Português', 'Descricao em Portugues', 'Português', 'Portugues', 'PT', 'pt'];
+          const possibleEnCols = ['Description in English', 'English', 'EN', 'en', 'Ingles'];
+
+          let errorCodeCol = possibleErrorCols.find(col => col in firstRow);
+          let ptCol = possiblePtCols.find(col => col in firstRow);
+          let enCol = possibleEnCols.find(col => col in firstRow);
+
+          log(`✓ Coluna código: ${errorCodeCol || 'NÃO ENCONTRADA'}`);
+          log(`✓ Coluna PT: ${ptCol || 'NÃO ENCONTRADA'}`);
+          log(`✓ Coluna EN: ${enCol || 'NÃO ENCONTRADA'}`);
+
+          if (!errorCodeCol || !ptCol || !enCol) {
+            showMessage(importMsg, '❌ Planilha inválida! Colunas esperadas: Error_code, Descrição em Português, Description in English', 'error');
+            log('❌ Colunas obrigatórias não encontradas');
+            return;
+          }
+
+          showMessage(importMsg, `⏳ Importando ${jsonData.length} registros...`, 'info');
+
+          // Processar dados
+          const errorsData = {};
+          let importCount = 0;
+
+          jsonData.forEach((row, index) => {
+            const code = String(row[errorCodeCol] || '').trim();
+            const pt = String(row[ptCol] || '').trim();
+            const en = String(row[enCol] || '').trim();
+
+            if (code && code !== '_init' && pt && en) {
+              errorsData[code] = {
+                code: code,
+                pt: pt,
+                en: en
+              };
+              importCount++;
+              log(`✓ Linha ${index + 1}: ${code}`);
+            } else {
+              log(`⚠ Linha ${index + 1}: Dados incompletos, ignorada`);
+            }
+          });
+
+          log(`📊 Total de erros válidos: ${importCount}`);
+
+          if (importCount === 0) {
+            showMessage(importMsg, '❌ Nenhum registro válido encontrado', 'error');
+            return;
+          }
+
+          // Gravar no Firebase
+          log('💾 Gravando no Firebase...');
+          const errorsRef = ref(db, 'errors');
+          await set(errorsRef, errorsData);
+
+          log('✅ Dados gravados com sucesso!');
+          showMessage(importMsg, `✅ ${importCount} erros importados com sucesso!`, 'success');
+          
+          // Preview
+          preview.style.display = 'block';
+          const previewData = Object.values(errorsData).slice(0, 5);
+          preview.innerHTML = `
+            <h3>✅ Preview dos primeiros 5 registros importados:</h3>
+            ${previewData.map(err => `
+              <div class="preview-item">
+                <strong>Código: ${err.code}</strong>
+                <div>🇧🇷 PT: ${err.pt}</div>
+                <div>🇺🇸 EN: ${err.en}</div>
+              </div>
+            `).join('')}
+            <p style="margin-top:15px; color:#666;">
+              <strong>Total importado:</strong> ${importCount} registros
+            </p>
+          `;
+          
+          excelFile.value = '';
+        } catch (error) {
+          console.error('Erro completo:', error);
+          log('❌ ERRO: ' + error.message);
+          showMessage(importMsg, `❌ Erro ao importar: ${error.message}`, 'error');
+        }
+      };
+
+      reader.readAsArrayBuffer(file);
+    }
+
+    importBtn.addEventListener('click', importExcel);
+
+    // Carregar logs
+    async function loadLogs() {
+      try {
+        logsContainer.innerHTML = '⏳ Carregando...';
+        const logsRef = ref(db, 'logs');
+        const snapshot = await get(logsRef);
 
         if (!snapshot.exists()) {
-          results.innerHTML = `
-            <div class="no-results">
-              <div class="no-results-icon">📭</div>
-              <strong>Nenhum erro cadastrado</strong><br>
-              <small>Use o painel Admin para importar a planilha</small>
-            </div>
-          `;
+          logsContainer.innerHTML = '<p>📭 Nenhum log encontrado</p>';
           return;
         }
 
-        const errors = snapshot.val();
-        const totalErrors = Object.keys(errors).length;
-        console.log('Total de erros no banco:', totalErrors);
+        const logs = Object.entries(snapshot.val())
+          .filter(([key]) => key !== '_init')
+          .map(([key, log]) => ({ key, ...log }))
+          .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+          .slice(0, 50);
 
-        const queryLower = query.toLowerCase();
-        const matches = [];
-
-        // Filtrar erros
-        for (const [key, error] of Object.entries(errors)) {
-          if (key === '_init') continue;
-
-          const code = (error.code || '').toLowerCase();
-          const pt = (error.pt || '').toLowerCase();
-          const en = (error.en || '').toLowerCase();
-
-          if (code.includes(queryLower) || 
-              pt.includes(queryLower) || 
-              en.includes(queryLower)) {
-            matches.push(error);
-          }
-        }
-
-        console.log('Resultados encontrados:', matches.length);
-
-        // Exibir resultados
-        if (matches.length === 0) {
-          results.innerHTML = `
-            <div class="no-results">
-              <div class="no-results-icon">🔍</div>
-              <strong>Nenhum resultado encontrado</strong><br>
-              Sua busca por "<strong>${query}</strong>" não retornou resultados.<br>
-              <small>Tente usar palavras-chave diferentes ou parte do código</small>
-            </div>
-          `;
-        } else {
-          results.innerHTML = `
-            <div class="results-header">
-              <div class="results-count">
-                ✅ ${matches.length} resultado${matches.length > 1 ? 's' : ''} encontrado${matches.length > 1 ? 's' : ''} para: <strong>"${query}"</strong>
-              </div>
-            </div>
-            ${matches.map(error => `
-              <div class="error-card">
-                <div class="error-code">${error.code || 'N/A'}</div>
-                <div class="error-desc">
-                  <strong>🇧🇷 Português:</strong>
-                  ${error.pt || 'Sem descrição'}
-                </div>
-                <div class="error-desc">
-                  <strong>🇺🇸 English:</strong>
-                  ${error.en || 'No description'}
-                </div>
-              </div>
-            `).join('')}
-          `;
-        }
-      } catch (error) {
-        console.error('Erro na busca:', error);
-        results.innerHTML = `
-          <div class="no-results">
-            <div class="no-results-icon">❌</div>
-            <strong>Erro ao buscar</strong><br>
-            ${error.message}
-          </div>
+        logsContainer.innerHTML = `
+          <table class="logs-table">
+            <thead>
+              <tr>
+                <th>Data/Hora</th>
+                <th>Usuário</th>
+                <th>Consulta</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${logs.map(log => `
+                <tr>
+                  <td>${new Date(log.timestamp).toLocaleString('pt-BR')}</td>
+                  <td>${log.user}</td>
+                  <td>${log.query}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
         `;
+      } catch (error) {
+        logsContainer.innerHTML = `<p class="message error">❌ Erro: ${error.message}</p>`;
       }
     }
 
-    // Limpar busca
-    function clearSearch() {
-      console.log('Limpar clicado');
-      searchInput.value = '';
-      results.innerHTML = `
-        <div class="info-message highlight">
-          <strong>👋 Bem-vindo!</strong><br>
-          Digite algo no campo acima para buscar erros NPAC.
-        </div>
-      `;
-      searchInput.focus();
+    loadLogsBtn.addEventListener('click', loadLogs);
+
+    // Carregar usuários
+    async function loadUsers() {
+      try {
+        usersContainer.innerHTML = '⏳ Carregando...';
+        const usersRef = ref(db, 'allowed_users');
+        const snapshot = await get(usersRef);
+
+        if (!snapshot.exists()) {
+          usersContainer.innerHTML = '<p>📭 Nenhum usuário autorizado</p>';
+          return;
+        }
+
+        const users = Object.keys(snapshot.val());
+
+        usersContainer.innerHTML = `
+          <ul class="users-list">
+            ${users.map(user => `
+              <li>
+                <span>👤 ${user}</span>
+                <button class="btn-remove" data-user="${user}">Remover</button>
+              </li>
+            `).join('')}
+          </ul>
+        `;
+
+        document.querySelectorAll('.btn-remove').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            const username = e.target.dataset.user;
+            if (confirm(`Remover usuário "${username}"?`)) {
+              try {
+                const userRef = ref(db, `allowed_users/${username}`);
+                await remove(userRef);
+                loadUsers();
+              } catch (error) {
+                alert('Erro ao remover: ' + error.message);
+              }
+            }
+          });
+        });
+      } catch (error) {
+        usersContainer.innerHTML = `<p class="message error">❌ Erro: ${error.message}</p>`;
+      }
     }
 
-    // Eventos
-    console.log('Configurando eventos...');
-
-    searchBtn.addEventListener('click', () => {
-      console.log('Botão Buscar clicado');
-      searchErrors();
-    });
-
-    clearBtn.addEventListener('click', () => {
-      console.log('Botão Limpar clicado');
-      clearSearch();
-    });
-
-    searchInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        console.log('Enter pressionado');
-        searchErrors();
-      }
-    });
-
-    // Focar no campo ao carregar
-    searchInput.focus();
-    console.log('=== USER PAGE PRONTA ===');
+    loadUsersBtn.addEventListener('click', loadUsers);
   </script>
 </body>
 </html>
