@@ -4,7 +4,163 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ERRO NPAC SPN - Login</title>
-  <link rel="stylesheet" href="styles.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .login-box {
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+
+    .login-box h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 2em;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      text-align: left;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 600;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: all 0.3s;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .hint {
+      display: block;
+      text-align: left;
+      color: #999;
+      font-size: 12px;
+      margin-top: 5px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin: 5px 0;
+    }
+
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #5a6268;
+    }
+
+    .message {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+      display: block;
+    }
+
+    .message.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+      display: block;
+    }
+
+    .message.info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+      display: block;
+    }
+
+    .debug-info {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      font-size: 12px;
+      text-align: left;
+      border: 1px solid #dee2e6;
+    }
+
+    .debug-info strong {
+      color: #495057;
+    }
+
+    #debugInfo {
+      margin-top: 8px;
+      color: #666;
+      font-family: 'Courier New', monospace;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -20,72 +176,106 @@
           placeholder="Digite seu nome (ex: helio_he710)"
           autocomplete="off"
         >
-        <small class="hint">Apenas letras minúsculas, números e underscore</small>
+        <small class="hint">Aceita letras, números e underscore</small>
       </div>
 
       <button id="loginBtn" class="btn-primary">Entrar</button>
       <button id="adminBtn" class="btn-secondary">Acesso Admin</button>
 
-      <div id="errorMsg" class="error-message"></div>
+      <div id="errorMsg" class="message"></div>
+      
+      <div class="debug-info">
+        <strong>🔍 Status da Conexão:</strong>
+        <div id="debugInfo">⏳ Verificando Firebase...</div>
+      </div>
     </div>
   </div>
 
   <script type="module">
-    import { db } from './firebase-config.js';
-    import { ref, get } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    // Configuração Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyC99A9g4nMpYzujhzZiT2xUKfdN0MAkNGY",
+      authDomain: "erro-npac-spn.firebaseapp.com",
+      databaseURL: "https://erro-npac-spn-default-rtdb.firebaseio.com",
+      projectId: "erro-npac-spn",
+      appId: "1:568064054155:web:450e7769371ed7c6c1958e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
     const usernameInput = document.getElementById('username');
     const loginBtn = document.getElementById('loginBtn');
     const adminBtn = document.getElementById('adminBtn');
     const errorMsg = document.getElementById('errorMsg');
+    const debugInfo = document.getElementById('debugInfo');
 
     // Normalizar nome
     function normalizeName(name) {
       return name.toLowerCase().trim().replace(/\s+/g, '_');
     }
 
-    // Validar nome
-    function validateUsername(name) {
-      const regex = /^[a-z0-9_]{3,}$/;
-      return regex.test(name);
+    // Mostrar mensagem
+    function showMessage(text, type) {
+      errorMsg.textContent = text;
+      errorMsg.className = `message ${type}`;
     }
 
-    // Login de usuário
+    // Login
     async function handleLogin() {
-      const username = normalizeName(usernameInput.value);
+      const rawInput = usernameInput.value;
+      const username = normalizeName(rawInput);
       
-      if (!validateUsername(username)) {
-        errorMsg.textContent = '❌ Nome inválido. Use apenas letras minúsculas, números e underscore (mín. 3 caracteres)';
-        errorMsg.style.display = 'block';
+      console.log('=== LOGIN DEBUG ===');
+      console.log('Input digitado:', rawInput);
+      console.log('Nome normalizado:', username);
+      
+      if (!username || username.length < 3) {
+        showMessage('❌ Digite um nome com pelo menos 3 caracteres', 'error');
         return;
       }
+
+      showMessage('⏳ Verificando acesso...', 'info');
 
       try {
         const usersRef = ref(db, 'allowed_users');
         const snapshot = await get(usersRef);
         
+        console.log('Firebase respondeu:', snapshot.exists());
+        
         if (!snapshot.exists()) {
-          errorMsg.textContent = '❌ Erro ao acessar banco de dados';
-          errorMsg.style.display = 'block';
+          showMessage('❌ Nenhum usuário cadastrado. Use o painel Admin.', 'error');
+          debugInfo.innerHTML = '⚠️ Firebase conectado, mas sem usuários cadastrados';
           return;
         }
 
         const users = snapshot.val();
+        console.log('Usuários no banco:', users);
+        console.log('Verificando:', username);
+        console.log('Existe?', username in users);
+        console.log('Valor:', users[username]);
         
         if (users[username] === true) {
+          showMessage('✅ Acesso autorizado! Redirecionando...', 'success');
           sessionStorage.setItem('currentUser', username);
-          window.location.href = 'user.html';
+          setTimeout(() => {
+            window.location.href = 'user.html';
+          }, 1000);
         } else {
-          errorMsg.textContent = '❌ Usuário não autorizado. Entre em contato com o administrador.';
-          errorMsg.style.display = 'block';
+          showMessage(`❌ Usuário "${username}" não autorizado. Use o painel Admin para cadastrar.`, 'error');
+          debugInfo.innerHTML = `❌ Usuário não encontrado em: ${Object.keys(users).join(', ')}`;
         }
       } catch (error) {
-        errorMsg.textContent = '❌ Erro ao conectar com Firebase: ' + error.message;
-        errorMsg.style.display = 'block';
+        console.error('Erro:', error);
+        showMessage('❌ Erro: ' + error.message, 'error');
+        debugInfo.innerHTML = `❌ Erro de conexão: ${error.message}`;
       }
     }
 
-    // Admin direto
+    // Admin
     function handleAdmin() {
       window.location.href = 'admin.html';
     }
@@ -98,9 +288,29 @@
       if (e.key === 'Enter') handleLogin();
     });
 
-    // Limpar mensagem ao digitar
     usernameInput.addEventListener('input', () => {
-      errorMsg.style.display = 'none';
+      errorMsg.className = 'message';
+    });
+
+    // Verificação inicial
+    window.addEventListener('load', async () => {
+      try {
+        debugInfo.textContent = '⏳ Conectando ao Firebase...';
+        
+        const testRef = ref(db, 'allowed_users');
+        const snapshot = await get(testRef);
+        
+        if (snapshot.exists()) {
+          const users = Object.keys(snapshot.val());
+          debugInfo.innerHTML = `✅ Firebase conectado<br>📋 Usuários cadastrados: <strong>${users.join(', ')}</strong>`;
+          console.log('Usuários disponíveis:', users);
+        } else {
+          debugInfo.innerHTML = '⚠️ Firebase conectado, mas <strong>nenhum usuário cadastrado</strong><br>💡 Use o botão "Acesso Admin" para adicionar usuários';
+        }
+      } catch (error) {
+        debugInfo.innerHTML = `❌ Erro ao conectar: ${error.message}`;
+        console.error('Erro de conexão:', error);
+      }
     });
   </script>
 </body>
