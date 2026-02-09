@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consulta de Erros NPAC</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔍 Consulta de Erros NPAC</h1>
+      <div class="user-info">
+        <span id="currentUser"></span>
+        <button id="logoutBtn" class="btn-logout">Sair</button>
+      </div>
+    </div>
+
+    <div class="search-box">
+      <input 
+        type="text" 
+        id="searchInput" 
+        placeholder="Digite código do erro ou parte da descrição (PT/EN)..."
+        autocomplete="off"
+      >
+      <button id="searchBtn" class="btn-primary">Buscar</button>
+      <button id="clearBtn" class="btn-secondary">Limpar</button>
+    </div>
+
+    <div id="results" class="results"></div>
+    <div id="loading" class="loading" style="display: none;">⏳ Carregando...</div>
+  </div>
+
+  <script type="module">
+    import { db } from './firebase-config.js';
+    import { ref, get, push, set } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+    // Verificar sessão
+    const currentUser = sessionStorage.getItem('currentUser');
+    if (!currentUser) {
+      window.location.href = 'index.html';
+    }
+
+    document.getElementById('currentUser').textContent = `👤 ${currentUser}`;
+
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const results = document.getElementById('results');
+    const loading = document.getElementById('loading');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    // Logout
+    logoutBtn.addEventListener('click', () => {
+      sessionStorage.removeItem('currentUser');
+      window.location.href = 'index.html';
+    });
+
+    // Registrar log
+    async function logSearch(query) {
+      try {
+        const logsRef = ref(db, 'logs');
+        const newLogRef = push(logsRef);
+        await set(newLogRef, {
+          user: currentUser,
+          query: query,
+          timestamp: new Date().toISOString()
+        });
+      } catch (error) {
+        console.error('Erro ao registrar log:', error);
+      }
+    }
+
+    // Buscar erros
+    async function searchErrors() {
+      const query = searchInput.value.trim();
+      
+      if (!query) {
+        results.innerHTML = '<p class="info">⚠️ Digite algo para buscar</p>';
+        return;
+      }
+
+      loading.style.display = 'block';
+      results.innerHTML = '';
+
+      try {
+        // Registrar log
+        await logSearch(query);
+
+        // Buscar dados
+        const errorsRef = ref(db, 'errors');
+        const snapshot = await get(errorsRef);
+
+        if (!snapshot.exists()) {
+          results.innerHTML = '<p class="info">📭 Nenhum erro cadastrado no sistema</p>';
+          loading.style.display = 'none';
+          return;
+        }
+
+        const errors = snapshot.val();
+        const queryLower = query.toLowerCase();
+        const matches = [];
+
+        // Filtrar erros
+        for (const [key, error] of Object.entries(errors)) {
+          if (key === '_init') continue;
+
+          const code = (error.code || '').toLowerCase();
+          const pt = (error.pt || '').toLowerCase();
+          const en = (error.en || '').toLowerCase();
+
+          if (code.includes(queryLower) || 
+              pt.includes(queryLower) || 
+              en.includes(queryLower)) {
+            matches.push(error);
+          }
+        }
+
+        loading.style.display = 'none';
+
+        // Exibir resultados
+        if (matches.length === 0) {
+          results.innerHTML = `<p class="info">❌ Nenhum resultado encontrado para: <strong>${query}</strong></p>`;
+        } else {
+          results.innerHTML = `
+            <p class="info">✅ ${matches.length} resultado(s) encontrado(s)</p>
+            ${matches.map(error => `
+              <div class="error-card">
+                <div class="error-code">${error.code || 'N/A'}</div>
+                <div class="error-desc">
+                  <strong>🇧🇷 Português:</strong> ${error.pt || 'Sem descrição'}
+                </div>
+                <div class="error-desc">
+                  <strong>🇺🇸 English:</strong> ${error.en || 'No description'}
+                </div>
+              </div>
+            `).join('')}
+          `;
+        }
+      } catch (error) {
+        loading.style.display = 'none';
+        results.innerHTML = `<p class="error">❌ Erro ao buscar: ${error.message}</p>`;
+      }
+    }
+
+    // Limpar busca
+    function clearSearch() {
+      searchInput.value = '';
+      results.innerHTML = '';
+      searchInput.focus();
+    }
+
+    // Eventos
+    searchBtn.addEventListener('click', searchErrors);
+    clearBtn.addEventListener('click', clearSearch);
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') searchErrors();
+    });
+
+    searchInput.focus();
+  </script>
+</body>
+</html>
