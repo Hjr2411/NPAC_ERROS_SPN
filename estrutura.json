@@ -1,0 +1,7 @@
+/
+├── index.html          (Tela de login)
+├── user.html           (Tela de consulta)
+├── admin.html          (Tela administrativa)
+├── firebase-config.js  (Configuração Firebase)
+├── styles.css          (Estilos globais)
+└── README.md
