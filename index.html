@@ -13,7 +13,7 @@
 
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #021468 0%, #3d3348 100%);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
       display: flex;
       justify-content: center;
@@ -164,7 +164,7 @@
         <input 
           type="text" 
           id="username" 
-          placeholder="Digite seu login (ex: inaiara_npac)"
+          placeholder="Digite seu nome (ex: helio_he710)"
           autocomplete="off"
         >
         <small class="hint">Aceita letras, números e underscore</small>
@@ -201,9 +201,6 @@
     const loginBtn = document.getElementById('loginBtn');
     const errorMsg = document.getElementById('errorMsg');
     const debugInfo = document.getElementById('debugInfo');
-
-    // Lista de usuários admin
-    const ADMIN_USERS = ['helio_he710', 'admin'];
 
     // Normalizar nome
     function normalizeName(name) {
@@ -254,9 +251,13 @@
           showMessage('✅ Acesso autorizado! Redirecionando...', 'success');
           sessionStorage.setItem('currentUser', username);
           
-          // Verificar se é admin
+          // Verificar se é admin no Firebase
+          const adminRef = ref(db, 'admin_users');
+          const adminSnapshot = await get(adminRef);
+          const isAdmin = adminSnapshot.exists() && adminSnapshot.val()[username] === true;
+          
           setTimeout(() => {
-            if (ADMIN_USERS.includes(username)) {
+            if (isAdmin) {
               window.location.href = 'admin.html';
             } else {
               window.location.href = 'user.html';
