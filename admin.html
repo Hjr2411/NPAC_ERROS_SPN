@@ -13,7 +13,7 @@
 
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #010d19 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
       padding: 20px;
     }
@@ -341,22 +341,37 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // LISTA DE ADMINS AUTORIZADOS (adicione os nomes aqui)
-    const ADMIN_USERS = ['helio_he710', 'admin']; // Adicione mais admins conforme necessário
-
     // Verificar se está autenticado E é admin
     const currentUser = sessionStorage.getItem('currentUser');
     
     if (!currentUser) {
       alert('⚠️ Acesso negado! Faça login primeiro.');
       window.location.href = 'index.html';
-    } else if (!ADMIN_USERS.includes(currentUser)) {
-      alert('🚫 Acesso negado! Você não tem permissão de administrador.');
-      window.location.href = 'user.html';
     }
 
-    console.log('=== ADMIN PAGE ===');
-    console.log('Usuário admin:', currentUser);
+    // Verificar permissão admin no Firebase
+    async function checkAdminAccess() {
+      try {
+        const adminRef = ref(db, 'admin_users');
+        const snapshot = await get(adminRef);
+        const isAdmin = snapshot.exists() && snapshot.val()[currentUser] === true;
+        
+        if (!isAdmin) {
+          alert('🚫 Acesso negado! Você não tem permissão de administrador.');
+          window.location.href = 'user.html';
+        } else {
+          console.log('=== ADMIN PAGE ===');
+          console.log('Usuário admin:', currentUser);
+        }
+      } catch (error) {
+        console.error('Erro ao verificar permissões:', error);
+        alert('Erro ao verificar permissões. Redirecionando...');
+        window.location.href = 'index.html';
+      }
+    }
+
+    // Executar verificação
+    checkAdminAccess();
 
     const backBtn = document.getElementById('backBtn');
     const newUsername = document.getElementById('newUsername');
