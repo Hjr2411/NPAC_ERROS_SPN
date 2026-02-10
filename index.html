@@ -248,21 +248,35 @@
         console.log('Valor:', users[username]);
         
         if (users[username] === true) {
-          showMessage('✅ Acesso autorizado! Redirecionando...', 'success');
           sessionStorage.setItem('currentUser', username);
           
           // Verificar se é admin no Firebase
-          const adminRef = ref(db, 'admin_users');
-          const adminSnapshot = await get(adminRef);
-          const isAdmin = adminSnapshot.exists() && adminSnapshot.val()[username] === true;
-          
-          setTimeout(() => {
-            if (isAdmin) {
-              window.location.href = 'admin.html';
-            } else {
+          try {
+            const adminRef = ref(db, 'admin_users');
+            const adminSnapshot = await get(adminRef);
+            const isAdmin = adminSnapshot.exists() && adminSnapshot.val()[username] === true;
+            
+            console.log('Verificando admin para:', username);
+            console.log('É admin?', isAdmin);
+            
+            showMessage('✅ Acesso autorizado! Redirecionando...', 'success');
+            
+            setTimeout(() => {
+              if (isAdmin) {
+                console.log('Redirecionando para admin.html');
+                window.location.href = 'admin.html';
+              } else {
+                console.log('Redirecionando para user.html');
+                window.location.href = 'user.html';
+              }
+            }, 500);
+          } catch (error) {
+            console.error('Erro ao verificar admin:', error);
+            showMessage('✅ Acesso autorizado! Redirecionando...', 'success');
+            setTimeout(() => {
               window.location.href = 'user.html';
-            }
-          }, 500);
+            }, 500);
+          }
         } else {
           showMessage(`❌ Usuário "${username}" não autorizado.`, 'error');
           debugInfo.innerHTML = '❌ Acesso negado';
