@@ -13,7 +13,7 @@
 
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #021468 0%, #3d3348 100%);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
       display: flex;
       justify-content: center;
@@ -293,9 +293,7 @@
         const snapshot = await get(testRef);
         
         if (snapshot.exists()) {
-          const users = Object.keys(snapshot.val());
-          debugInfo.innerHTML = `✅ Firebase conectado<br>📋 Usuários cadastrados: <strong>${users.join(', ')}</strong>`;
-          console.log('Usuários disponíveis:', users);
+          debugInfo.innerHTML = '✅ Firebase conectado e pronto para uso';
         } else {
           debugInfo.innerHTML = '⚠️ Firebase conectado, mas <strong>nenhum usuário cadastrado</strong>';
         }
