@@ -265,7 +265,7 @@
           }, 500);
         } else {
           showMessage(`❌ Usuário "${username}" não autorizado.`, 'error');
-          debugInfo.innerHTML = `❌ Usuário não encontrado em: ${Object.keys(users).join(', ')}`;
+          debugInfo.innerHTML = '❌ Acesso negado';
         }
       } catch (error) {
         console.error('Erro:', error);
