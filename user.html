@@ -292,7 +292,17 @@
       window.location.href = 'index.html';
     }
 
+    // Lista de admins (DECLARAR ANTES DE USAR)
+    const ADMIN_USERS = ['helio_he710', 'admin'];
+    const isAdmin = ADMIN_USERS.includes(currentUser);
+
     document.getElementById('currentUser').textContent = `👤 ${currentUser}`;
+
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const results = document.getElementById('results');
+    const logoutBtn = document.getElementById('logoutBtn');
 
     // Adicionar botão Admin se for admin
     if (isAdmin) {
@@ -307,18 +317,9 @@
       document.querySelector('.user-info').insertBefore(adminBtn, logoutBtn);
     }
 
-    const searchInput = document.getElementById('searchInput');
-    const searchBtn = document.getElementById('searchBtn');
-    const clearBtn = document.getElementById('clearBtn');
-    const results = document.getElementById('results');
-    const logoutBtn = document.getElementById('logoutBtn');
-
-    // Lista de admins
-    const ADMIN_USERS = ['helio_he710', 'admin'];
-    const isAdmin = ADMIN_USERS.includes(currentUser);
-
     console.log('=== USER PAGE CARREGADA ===');
     console.log('Usuário:', currentUser);
+    console.log('É admin:', isAdmin);
     console.log('Botões encontrados:', {
       searchBtn: !!searchBtn,
       clearBtn: !!clearBtn,
